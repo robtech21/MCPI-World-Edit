@@ -1,20 +1,25 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #Welcome to the mess that is my code!
 #I'm mostly self-taught, so I'm sorry in advance if I don't follow conventions perfectly.
+
+#I'm also self taught, and your code is fairly decent. But I'm using a few of my own methods to make it shorter :) -Robert
 
 #Import Minecraft
 import mcpi.minecraft
 #Import mcpi.block for using words instead of ID's
 import mcpi.block as block
-#Import math (for sphere function)
-import math
-#Import random (for replace & replacenear functions)
-import random
-#Detect key presses. If you don't have this, do: pip3 install pynput
+#Import math (for sphere function), and random (for replace & replacenear functions)
+import math, random
+#Detect key presses (requires pynput)
 from pynput.keyboard import Key, Listener
 
 #Less typing for me :)
+
 mc = mcpi.minecraft.Minecraft.create()
+chatMsg = mc.postToChat
+setBlks = mc.setBlocks
+setBlk  = mc.setBlock
+
 #some global variables that I need
 worldType = 0
 #Will equal 1, void, 2, small superflat, 3, large superflat.
@@ -134,7 +139,7 @@ def replace(oldIDList, newIDList, oldDataList, newDataList, x1, y1, z1, x2, y2, 
                             mc.setBlock(xlow + x, ylow + y, zlow + z, newID, newDataList[newIDList.index(newID)])
                         else:
                             mc.setBlock(xlow + x, ylow + y, zlow + z, newIDList[0], newDataList[0])
-    mc.postToChat("Operation complete. " + str(blocksChangedCount) + " blocks were affected.")
+    chatMsg("Operation complete. " + str(blocksChangedCount) + " blocks were affected.")
 
 def replacenear(oldIDList, newIDList, oldDataList, newDataList, radius, x, y, z):
     x1 = x - radius
@@ -163,10 +168,10 @@ def replacenear(oldIDList, newIDList, oldDataList, newDataList, radius, x, y, z)
                         lengthNewIDList = len(newIDList)
                         if lengthNewIDList > 1: 
                             newID = newIDList[random.randint(0, len(newIDList) - 1)]
-                            mc.setBlock(xlow + x, ylow + y, zlow + z, newID, newDataList[newIDList.index(newID)])
+                            setBlk(xlow + x, ylow + y, zlow + z, newID, newDataList[newIDList.index(newID)])
                         else:
-                            mc.setBlock(xlow + x, ylow + y, zlow + z, newIDList[0], newDataList[0])
-    mc.postToChat("Operation complete. " + str(blocksChangedCount) + " blocks were affected.")
+                            setBlk(xlow + x, ylow + y, zlow + z, newIDList[0], newDataList[0])
+    chatMsg("Operation complete. " + str(blocksChangedCount) + " blocks were affected.")
 
 def getPos1():
     global pos1x, pos1y, pos1z
@@ -176,11 +181,11 @@ def getPos1():
 def getPos2():
     global pos2x, pos2y, pos2z
     pos2x, pos2y, pos2z = mc.player.getTilePos()
-    mc.postToChat("Pos 2 is set to (" + str(pos2x) + ", " + str(pos2y) + ", " + str(pos2z) + ")")
+    chatMsg("Pos 2 is set to (" + str(pos2x) + ", " + str(pos2y) + ", " + str(pos2z) + ")")
 
 def cuboid(data, ID, x1, x2, y1, y2, z1, z2):
     #We subtract 1 from y since getTilePos() will actually return your leg position.
-    mc.setBlocks(x1, y1 - 1 , z1, x2, y2 - 1, z2, ID, data)
+    setBlks(x1, y1 - 1 , z1, x2, y2 - 1, z2, ID, data)
     
 def hcube(data, ID, x1, x2, y1, y2, z1, z2):
     buf = 0
@@ -197,12 +202,12 @@ def hcube(data, ID, x1, x2, y1, y2, z1, z2):
         z2 = z1
         z1 = buf
     #This used to create a cube then a cube of air inside of it, but that deletes the insides (not good)
-    mc.setBlocks(x1, y1 - 1, z2, x2, y2 - 1, z2, ID, data) #Back wall
-    mc.setBlocks(x1, y1 - 1, z1, x2, y2 - 1, z1, ID, data) #Front wall
-    mc.setBlocks(x1, y1 - 1, z1, x1, y2 - 1, z2, ID, data) #Left wall
-    mc.setBlocks(x2, y1 - 1, z1, x2, y2 - 1, z2, ID, data) #Right wall
-    mc.setBlocks(x1, y1 - 1, z1, x2, y1 - 1, z2, ID, data) #Floor
-    mc.setBlocks(x1, y2 - 1, z1, x2, y2 - 1, z2, ID, data) #Roof
+    setBlks(x1, y1 - 1, z2, x2, y2 - 1, z2, ID, data) #Back wall
+    setBlks(x1, y1 - 1, z1, x2, y2 - 1, z1, ID, data) #Front wall
+    setBlks(x1, y1 - 1, z1, x1, y2 - 1, z2, ID, data) #Left wall
+    setBlks(x2, y1 - 1, z1, x2, y2 - 1, z2, ID, data) #Right wall
+    setBlks(x1, y1 - 1, z1, x2, y1 - 1, z2, ID, data) #Floor
+    setBlks(x1, y2 - 1, z1, x2, y2 - 1, z2, ID, data) #Roof
     
 #Creates walls given 2 points and block + data
 def walls(data, ID, x1, x2, y1, y2, z1, z2):
@@ -221,10 +226,10 @@ def walls(data, ID, x1, x2, y1, y2, z1, z2):
         z2 = z1
         z1 = buf
         z1 = buf
-    mc.setBlocks(x1, y1 - 1, z2, x2, y2 - 1, z2, ID, data) #Back wall
-    mc.setBlocks(x1, y1 - 1, z1, x2, y2 - 1, z1, ID, data) #Front wall
-    mc.setBlocks(x1, y1 - 1, z1, x1, y2 - 1, z2, ID, data) #Left wall
-    mc.setBlocks(x2, y1 - 1, z1, x2, y2 - 1, z2, ID, data) #Right wall
+    setBlks(x1, y1 - 1, z2, x2, y2 - 1, z2, ID, data) #Back wall
+    setBlks(x1, y1 - 1, z1, x2, y2 - 1, z1, ID, data) #Front wall
+    setBlks(x1, y1 - 1, z1, x1, y2 - 1, z2, ID, data) #Left wall
+    setBlks(x2, y1 - 1, z1, x2, y2 - 1, z2, ID, data) #Right wall
     
 def toggle_world():
     global worldType
@@ -232,23 +237,23 @@ def toggle_world():
     if worldType > 3:
         worldType = 1
     if worldType == 1:
-        mc.postToChat("Toggled to void world")
-        mc.setBlocks(-128, -64,-128, 128, 30, 128, 0)
+        chatMsg("Toggled to void world")
+        setBlks(-128, -64,-128, 128, 30, 128, 0)
         mc.player.setPos(0,10,0)
-        mc.setBlocks(-10, 0, -10, 10, 0, 10, 1)
-        mc.postToChat("Platform Created At (0, 0). Teleporting you there now.")
+        setBlks(-10, 0, -10, 10, 0, 10, 1)
+        chatMsg("Platform Created At (0, 0). Teleporting you there now.")
     if worldType == 2:
-        mc.postToChat("Toggled to small superflat")
-        mc.setBlocks(-128, -64, -128, 128, -64, 128, 7)
-        mc.setBlocks(-128, -63, -128, 128, -62, 128, 3)
-        mc.setBlocks(-128, -61, -128, 128, -61, 128, 2)
+        chatMsg("Toggled to small superflat")
+        setBlks(-128, -64, -128, 128, -64, 128, 7)
+        setBlks(-128, -63, -128, 128, -62, 128, 3)
+        setBlks(-128, -61, -128, 128, -61, 128, 2)
         x, y, z = mc.player.getPos()
         mc.player.setPos = x, -60, z
     if worldType == 3:
-        mc.postToChat("Toggled to large superflat")
-        mc.setBlocks(-128, -64, -128, 128, -64, 128, 7)
-        mc.setBlocks(-128, -63, -128, 128, -50, 128, 3)
-        mc.setBlocks(-128, -49, -128, 128, -49, 128, 2)
+        chatMsg("Toggled to large superflat")
+        setBlks(-128, -64, -128, 128, -64, 128, 7)
+        setBlks(-128, -63, -128, 128, -50, 128, 3)
+        setBlks(-128, -49, -128, 128, -49, 128, 2)
         x, y, z = mc.player.getPos()
         mc.player.setPos = x, -48, z
     return
@@ -313,7 +318,7 @@ def center(data, ID, x1, x2, y1, y2, z1, z2):
     z = (x2 + z1) / 2
     y = (y2 + y1) / 2
     x, y, z = round(x), round(y), round(z)
-    mc.setBlock(x, y - 1, z, ID, data)
+    setBlk(x, y - 1, z, ID, data)
 
 #Change the function with Right Shift
 def change_function():
@@ -332,7 +337,7 @@ def change_function():
     if func == 9:
         func = 1
     print(funcDict[func])
-    mc.postToChat(funcDict[func])
+    chatMsg(funcDict[func])
 
 def findType(ID):
     try:
@@ -373,13 +378,13 @@ def setblock_query():
             print("Pos1: ", pos1x, " ", pos1y, " ", pos1z)
         except NameError:
             print("Pos1 not defined! Please select an area!")
-            mc.postToChat("Pos1 not defined! Please select an area!")
+            chatMsg("Pos1 not defined! Please select an area!")
             return
         try: #Make sure pos2 is defined.
             print("Pos2: ", pos2x, " ", pos2y, " ", pos2z)
         except NameError:
             print("Pos2 not defined! Please select an area!")
-            mc.postToChat("Pos2 not defined! Please select an area!")
+            chatMsg("Pos2 not defined! Please select an area!")
             return
     if not func == 7 and not func == 8: #If the function isn't replace or replace near
         ID = input("Choose block ID or name: ") #Get block ID from user
@@ -488,9 +493,9 @@ def on_release(key):
         #Note that you can hit right control to save your world
         delete += 1
         if delete == 1:
-            mc.postToChat("Press 2 more times to toggle world")
+            chatMsg("Press 2 more times to toggle world")
         elif delete == 2:
-            mc.postToChat("Press 1 more time to toggle world")
+            chatMsg("Press 1 more time to toggle world")
         else:
             toggle_world()
             delete = 0
@@ -503,10 +508,10 @@ def on_release(key):
     if key == Key.shift_r:
         change_function()
     if key == Key.ctrl_r:
-        mc.postToChat("World saved. Press the right Alt key to load it.")
+        chatMsg("World saved. Press the right Alt key to load it.")
         mc.saveCheckpoint()
     if key == Key.alt_r:
-        mc.postToChat("Your save has been loaded.")
+        chatMsg("Your save has been loaded.")
         mc.restoreCheckpoint()
         
 
